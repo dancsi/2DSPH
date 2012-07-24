@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "graphics.h"
 #include "config.h"
+#include <omp.h>
 
 #define SHITY_SDL_DEFINE
 
@@ -9,6 +10,7 @@ using namespace std;
 using namespace simulator;
 
 static bool running = true;
+bool	simulator::detailed_logging=false;
 int simulator::mousex=0, simulator::mousey=0, simulator::width, simulator::height;
 
 void init()
@@ -27,10 +29,12 @@ void init()
 		exit(1);
 	}
 
+	omp_set_num_threads(8);
+
 	int x, y;
 	SDL_PumpEvents();
 	SDL_GetMouseState(&x, &y);
-	physics::add_black_hole(physics::black_hole(math::vec(x, y)));
+	physics::add_black_hole(physics::black_hole(math::vec(x, y), 10000000));
 
 }
 
@@ -56,7 +60,16 @@ void handle_event(SDL_Event &evt, float dt)
 	{
 		mousex=evt.button.x; mousey=simulator::height-evt.button.y;
 		logger::log("clicked at %d, %d", mousex, mousey);
-		physics::blackholes_enabled=!physics::blackholes_enabled;
+		if(evt.button.button==SDL_BUTTON_LEFT)
+		{
+			physics::blackholes_enabled=!physics::blackholes_enabled;
+			logger::log("blackholes enabled: %s", physics::blackholes_enabled?"YES":"NO");
+		}
+		if(evt.button.button==SDL_BUTTON_RIGHT)
+		{
+			detailed_logging=!detailed_logging;
+			logger::log("logging enabled: %s", detailed_logging?"YES":"NO");
+		}
 	}
 	if(evt.type==SDL_MOUSEMOTION)
 	{
@@ -105,7 +118,7 @@ int main( int argc, char *argv[] )
 		render();
 
 		SDL_GL_SwapBuffers();
-		SDL_Delay(1);
+		//SDL_Delay(1);
 	}
 
 	destroy();

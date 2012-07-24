@@ -15,6 +15,6 @@ namespace physics
 
 	math::vec black_hole::get_force_field( math::vec point )
 	{
-		return force*(pos-point);
+		return force*(pos-point)/(point-pos).LengthSq();
 	}
 }

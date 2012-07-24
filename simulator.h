@@ -26,6 +26,7 @@ namespace simulator
 	extern int height, width;
 
 	extern int mousex, mousey;
+	extern bool detailed_logging;
 
 	inline int64_t SDL_GetPerformanceCounter()
 	{

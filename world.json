@@ -4,7 +4,7 @@
         "h": 300
     },
     "constants": {
-        "gravity": -100
+        "gravity": -10
     },
     "objects": {
         "fixed": [
@@ -36,16 +36,16 @@
     "fluids": [
         {
             "name": "water",
-            "particles_x": 40,
-            "particles_y": 30,
-            "spacing_x": 4,
-            "spacing_y": 4,
+            "particles_x": 80,
+            "particles_y": 60,
+            "spacing_x": 1,
+            "spacing_y": 1,
             "start_x": 120,
             "start_y": 0,
             "mass": 20,
             "density": 2,
             "rest_density": 1,
-            "damping": 0.7,
+            "damping": 0.2,
             "eta": 5,
             "sigma": 5,
             "k": 25,

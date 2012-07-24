@@ -121,7 +121,7 @@ namespace math
 		operator std::string()
 		{
 			char buf[100];
-			sprintf(buf, "(%.5lf, %.5lf)", x, y);
+			sprintf(buf, "(%.2lf, %.2lf)", x, y);
 			return std::string(buf);
 		}
 	};

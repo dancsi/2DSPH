@@ -9,12 +9,18 @@ namespace math
 	{
 		switch(n)
 		{
+		case 0: return 1;
+		case 1: return x;
 		case 2: return x*x;
 		case 3: return x*x*x;
-		case 5: return pow(pow(x, 2), 2)*x;
-		case 6: pow(pow(x, 3), 2);
-		case 9: return pow(pow(x, 3), 3);
+		case 4: return (x*x)*(x*x);
+		case 5: return (x*x)*(x*x)*x;
+		case 6: return (x*x*x)*(x*x*x);
+		case 7: return (x*x*x)*(x*x*x)*x;
+		case 8: return ((x*x)*(x*x))*((x*x)*(x*x));
+		case 9: return (x*x*x)*(x*x*x)*(x*x*x);
 		default:
+			//__debugbreak();
 			double r=1;
 			for(int i=0;i<n;i++)
 				r*=x;

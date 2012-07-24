@@ -1,11 +1,12 @@
 #include "physics.h"
 
-#include "sph.h"
-#include "line.h"
 #include "config.h"
 #include "graphics.h"
-#include <vector>
+#include "line.h"
+#include "sph.h"
 #include <boost/foreach.hpp>
+#include <cmath>
+#include <vector>
 
 namespace physics
 {
@@ -13,6 +14,7 @@ namespace physics
 	std::vector<line> scenery;
 	std::vector<black_hole> black_holes;
 	bool blackholes_enabled=false;
+	double cell_size=4;
 	bool init()
 	{
 		using boost::property_tree::ptree;
@@ -58,6 +60,17 @@ namespace physics
 	{
 		black_holes.push_back(bh);
 		return black_holes.size()-1;
+	}
+
+	uint16_t hash( math::vec& pos )
+	{
+		return ((uint16_t(pos.x)&0xff)<<8)+(uint16_t(pos.y)&0xff);
+	}
+
+	uint16_t get_neighbor_cell( uint16_t hash, uint16_t dx, uint16_t dy )
+	{
+		//logger::log("first component: 0x%x, second: 0x%x, retval: 0x%x", ((hash>>8+dx)&0xff)<<8, ((hash&0xff)+dy)&0xff, ((((hash>>8)+dx)&0xff)<<8) + (((hash&0xff)+dy)&0xff));
+		return ((((hash>>8)+dx)&0xff)<<8)+(((hash&0xff)+dy)&0xff);
 	}
 
 }
