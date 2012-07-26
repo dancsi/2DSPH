@@ -62,15 +62,4 @@ namespace physics
 		return black_holes.size()-1;
 	}
 
-	uint16_t hash( math::vec& pos )
-	{
-		return ((uint16_t(pos.x)&0xff)<<8)+(uint16_t(pos.y)&0xff);
-	}
-
-	uint16_t get_neighbor_cell( uint16_t hash, uint16_t dx, uint16_t dy )
-	{
-		//logger::log("first component: 0x%x, second: 0x%x, retval: 0x%x", ((hash>>8+dx)&0xff)<<8, ((hash&0xff)+dy)&0xff, ((((hash>>8)+dx)&0xff)<<8) + (((hash&0xff)+dy)&0xff));
-		return ((((hash>>8)+dx)&0xff)<<8)+(((hash&0xff)+dy)&0xff);
-	}
-
 }

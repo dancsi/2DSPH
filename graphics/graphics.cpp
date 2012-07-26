@@ -2,18 +2,19 @@
 
 namespace graphics
 {
+	const double scale_factor=2.0;
 	bool init()
 	{
 		SDL_Init( SDL_INIT_EVERYTHING );
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		logger::log("init sdl (%d, %d)", simulator::width, simulator::height);
-		SDL_SetVideoMode( simulator::width, simulator::height, 32, SDL_OPENGL );
+		logger::log("init sdl (%d, %d)", simulator::width*scale_factor, simulator::height*scale_factor);
+		SDL_SetVideoMode( simulator::width*scale_factor, simulator::height*scale_factor, 32, SDL_OPENGL );
 
 		glClearColor( 0, 0, 0, 0 );
 
 		glMatrixMode( GL_PROJECTION );
 		glLoadIdentity();
-		glOrtho( 0, simulator::width, 0, simulator::height, -1, 1 );
+		glOrtho( 0, simulator::width*scale_factor, 0, simulator::height*scale_factor, -1, 1 );
 
 		glMatrixMode( GL_MODELVIEW );
 		glLoadIdentity();
@@ -41,10 +42,10 @@ namespace graphics
 		//glColor3f(1, 0, 0);
 		glBegin(GL_TRIANGLE_FAN);
 		double step=2*PI/n, angle=0;
-		glVertex2f(x, y);
+		glVertex2f(x*scale_factor, y*scale_factor);
 		for(int i=0;i<n;i++, angle+=step)
 		{
-			glVertex2d(x+cos(angle)*r, y+sin(angle)*r);
+			glVertex2d((x+cos(angle)*r)*scale_factor, (y+sin(angle)*r)*scale_factor);
 		}
 		glEnd();
 	}

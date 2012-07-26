@@ -4,7 +4,7 @@
 
 namespace math
 {
-	const double scale_factor=500;
+	const double PI=3.1415926535897932384626433832795;
 	inline double pow(double x, short n)
 	{
 		switch(n)
@@ -27,34 +27,49 @@ namespace math
 			return r;
 		}
 	}
-	double w_poly6( math::vec& r, double h )
+
+	double 
+		w_poly6_factor(0),
+		w_poly6_gradient_factor(0),
+		w_poly6_laplacian_factor(0),
+		w_viscosity_laplacian_factor(0),
+		w_spiky_gradient_factor(0);
+	double h(0), h_squared(0);
+
+	void calculate_common_factors(double _h)
 	{
-		return 997.90149318618375527090119634567*pow((pow(h, 2)-r.LengthSq()), 3)/pow(h, 9);
+		h=_h;
+		h_squared=h*h;
+		w_poly6_factor=315.0/(64.0*PI*pow(h, 9));
+		w_poly6_laplacian_factor=945.0/(8*PI*pow(h, 9));
+		w_poly6_gradient_factor=-945.0/(32*PI*pow(h, 9));
+		w_spiky_gradient_factor=-45.0/(PI*pow(h, 6));
+		w_viscosity_laplacian_factor=45.0/(PI*pow(h, 5));
 	}
 
-	math::vec w_gradient_spiky( math::vec& r, double h ) 
+	double w_poly6( double r)
 	{
-		double rr=r.Length();
-		return -r*14.323944878270580219199538703526*pow(h-rr, 3)/(pow(h, 6)*rr);
+		return w_poly6_factor*pow(h_squared-r*r, 3);
 	}
 
-	double w_laplacian_viscosity( math::vec& r, double h ) 
+	math::vec w_poly6_gradient( math::vec& r, double length_hint) 
 	{
-		return 14.323944878270580219199538703526*(1.0-r.Length()/h)/pow(h, 5);
+		return w_poly6_gradient_factor*r*pow(h_squared-length_hint*length_hint, 2);
 	}
 
-	math::vec w_gradient_poly6( math::vec& r, double h ) 
+	double w_poly6_laplacian( double r) 
 	{
-		return 9.4000888263650682688496972741891*(-r)*pow(pow(h, 2)-r.LengthSq(), 2)/pow(h, 9);
+		return w_poly6_laplacian_factor*(h_squared-r*r)*(1.75*r*r-0.75*h_squared);
 	}
 
-	double w_laplacian_poly6( math::vec& r, double h ) 
+	math::vec w_spiky_gradient( math::vec& r, double length_hint) 
 	{
-		double rr=r.LengthSq();
-		return 37.600355305460273075398789096757/pow(h, 9)*(pow(h, 2)-rr)*(rr-0.75*(pow(h, 2)-rr));
+		return (w_spiky_gradient_factor/length_hint)*pow(h-length_hint, 2)*r;
 	}
 
-
-
+	double w_viscosity_laplacian( double r) 
+	{
+		return w_viscosity_laplacian_factor*(1.0-r/h);
+	}
 
 }

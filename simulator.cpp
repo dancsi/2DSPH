@@ -74,7 +74,7 @@ void handle_event(SDL_Event &evt, float dt)
 	if(evt.type==SDL_MOUSEMOTION)
 	{
 		mousex=evt.button.x; mousey=simulator::height-evt.button.y;
-		physics::black_holes[0].pos.Set(mousex, mousey);
+		physics::black_holes[0].pos.Set(mousex/2, mousey/2);
 	}
 }
 
