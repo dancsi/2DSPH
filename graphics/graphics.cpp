@@ -2,7 +2,7 @@
 
 namespace graphics
 {
-	const double scale_factor=2.0;
+	const double scale_factor=1;
 	bool init()
 	{
 		SDL_Init( SDL_INIT_EVERYTHING );
@@ -27,9 +27,9 @@ namespace graphics
 		//glHint(GL_POLYGON_SMOOTH_HINT,GL_NICEST);
 
 		SDL_WM_SetCaption( "dowwin", NULL );
-
 		return 1;
 	}
+
 
 	bool destroy()
 	{

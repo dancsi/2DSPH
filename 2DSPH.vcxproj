@@ -78,8 +78,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <CreateHotpatchableImage>true</CreateHotpatchableImage>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <OpenMPSupport>false</OpenMPSupport>

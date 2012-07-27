@@ -74,7 +74,7 @@ void handle_event(SDL_Event &evt, float dt)
 	if(evt.type==SDL_MOUSEMOTION)
 	{
 		mousex=evt.button.x; mousey=simulator::height-evt.button.y;
-		physics::black_holes[0].pos.Set(mousex/2, mousey/2);
+		physics::black_holes[0].pos.Set(mousex, mousey);
 	}
 }
 
@@ -87,18 +87,24 @@ void render()
 {
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+	glTranslatef(200, 0, 0);
+	glScalef(2, 2, 2);
+	glTranslatef(-200, 0, 0);
 	physics::draw();
+	glPopMatrix();
 }
 
 int main( int argc, char *argv[] )
 {
 	init();
-
 	SDL_Event evt;
 	uint64_t oldtime=SDL_GetPerformanceCounter();
+	uint64_t tickcount=0;
 
 	while(running)
 	{
+		tickcount++;
 		uint64_t newtime=SDL_GetPerformanceCounter();
 		double timestep=double(newtime-oldtime)/SDL_GetPerformanceFrequency();
 		oldtime=newtime;
@@ -118,6 +124,7 @@ int main( int argc, char *argv[] )
 		render();
 
 		SDL_GL_SwapBuffers();
+		if(tickcount%50==0) logger::log("%.2lf fps", 1.0/timestep);
 		//SDL_Delay(1);
 	}
 

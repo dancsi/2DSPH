@@ -34,6 +34,14 @@ namespace math
 		vec2 &operator *=(const double Scalar)  { x *= Scalar; y *= Scalar;		return *this; }
 
 		vec2 &operator +=(const vec2 &Other) { x += Other.x;	y += Other.y;	return *this; }
+		vec2 &atomic_increment(const vec2& rhs) 
+		{
+#pragma omp atomic
+			x+=rhs.x;
+#pragma omp atomic
+			y+=rhs.y;
+			return *this;
+		}
 
 		vec2 &operator -=(const vec2 &Other) { x -= Other.x;	y -= Other.y;	return *this; }
 

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "math/vector.h"
+#include <boost/function.hpp>
 
 namespace sph
 {
@@ -43,11 +44,22 @@ namespace sph
 		particle *particles;
 		particle_grid* grid;
 		double eta, sigma, mass, smoothing_length, density, k, gradient_length_treshold, damping, rest_density, wall_damping;
+		double glass_pushback_distance, glass_pushback_minimum_pressure, glass_density, glass_viscosity;
 		int n;
 		fluid(int particles_x, int particles_y, double spacing_x, double spacing_y, math::vec pos );
 		~fluid();
 		void prepare_step();
 		void step(double dt);
+		void glass_common_update(boost::function<void (fluid*, particle*, math::vec)> f);
+		//template <typename T>
+		//void glass_common_update(T f);
+		void calculate_densities();
+		void calculate_densities(int x, int y);
+		void calculate_glass_fluid_densities(particle* p, math::vec r);
+		void calculate_forces();
+		void calculate_forces(particle_pair p);
+		void calculate_glass_fluid_forces(particle* p, math::vec r);
+		void update_positions(double dt);
 		void enforce_walls(particle* p, double dt, math::vec& newpos);
 		void enforce_glass(particle* p, double dt, math::vec& newpos);
 		void draw();
