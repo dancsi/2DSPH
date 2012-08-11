@@ -34,6 +34,9 @@
     <Filter Include="Header Files\config">
       <UniqueIdentifier>{d65f4268-eea0-44f7-bbcb-0e06980a8056}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\math">
+      <UniqueIdentifier>{c813f8b7-dd9e-4098-bb94-e8fa18f8da11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="simulator.cpp">
@@ -57,11 +60,11 @@
     <ClCompile Include="physics\obj.cpp">
       <Filter>Source Files\physics</Filter>
     </ClCompile>
-    <ClCompile Include="physics\line.cpp">
-      <Filter>Source Files\physics</Filter>
-    </ClCompile>
     <ClCompile Include="physics\black_hole.cpp">
       <Filter>Source Files\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="math\line.cpp">
+      <Filter>Source Files\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,9 +95,6 @@
     <ClInclude Include="physics\obj.h">
       <Filter>Header Files\physics</Filter>
     </ClInclude>
-    <ClInclude Include="physics\line.h">
-      <Filter>Header Files\physics</Filter>
-    </ClInclude>
     <ClInclude Include="physics\circle.h">
       <Filter>Header Files\physics</Filter>
     </ClInclude>
@@ -103,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="physics\black_hole.h">
       <Filter>Header Files\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="math\line.h">
+      <Filter>Header Files\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

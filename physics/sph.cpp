@@ -3,6 +3,7 @@
 #include "simulator.h"
 #include "math/vector.h"
 #include "math/kernels.h"
+#include "math/line.h"
 #include "graphics.h"
 #include "config.h"
 #include "boost/foreach.hpp"
@@ -13,7 +14,8 @@
 namespace sph
 {
 	std::vector<fluid> fluids;
-
+	double fluid::max_force;
+	const graphics::color particle::default_color = graphics::colors::blue;
 	void init()
 	{
 		BOOST_FOREACH(config::ptree::value_type& pt , config::cfg.get_child("fluids"))
@@ -85,29 +87,35 @@ namespace sph
 		/*STEP 1: calculate densities*/
 		calculate_densities();
 		glass_common_update(&fluid::calculate_glass_fluid_densities);
-		
+
 		/*if(simulator::detailed_logging)
 		{
-			printf("densities: ");
-			for(int i=0;i<n;i++)
-			{
-				printf("%lf ", particles[i].density);
-				if(particles[i].density!=density) system("pause");
-			}
-			printf("\n");
+		printf("densities: ");
+		for(int i=0;i<n;i++)
+		{
+		printf("%lf ", particles[i].density);
+		if(particles[i].density!=density) system("pause");
+		}
+		printf("\n");
 		}*/
-		
+
 		/*STEP 2: calculate forces*/
 		calculate_forces();
 		glass_common_update(&fluid::calculate_glass_fluid_forces);
 		/*STEP 3: move particles*/
 		update_positions(dt);
+		set_bounding_particle_indices();
+
+		logger::log("northmost particle: %d", north_particle_idx);
+		//particles[north_particle_idx].dump();
+		//particles[south_particle_idx].dump();
+		//particles[west_particle_idx].dump();
+		//particles[east_particle_idx].dump();
+		//if(particles[east_particle_idx])
 	}
 
 	void fluid::calculate_densities( int x, int y)
 	{
-		if(simulator::detailed_logging)
-			logger::log("calculate densities %d, %d", x, y);
 		const int16_t neighbor_dx[]={/*3x3*/ /*0,*/ 1, 1, 0, -1, -1, -1, 0, 1, /*5x5 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2, -2, -1, 0, 1*/};
 		const int16_t neighbor_dy[]={/*3x3*/ /*0,*/ 0, 1, 1, 1, 0, -1, -1, -1, /*5x5 -2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2*/};
 		const int n_neighbor_cells=sizeof(neighbor_dx)/sizeof(int16_t);
@@ -133,16 +141,16 @@ namespace sph
 					double additional_density=mass*math::w_poly6(r_length);
 					/*if(r.x!=0)	
 					{
-						logger::log("(%lf, %lf) -> %lf", r.x, r.y, additional_density);
-						system("pause");
-						//__debugbreak();
+					logger::log("(%lf, %lf) -> %lf", r.x, r.y, additional_density);
+					system("pause");
+					//__debugbreak();
 					}*/
-//#pragma omp atomic
+					//#pragma omp atomic
 					a->density+=additional_density;
-//#pragma omp atomic
+					//#pragma omp atomic
 					b->density+=additional_density;
 				}
-				
+
 			}
 
 			//neighbor cells
@@ -161,9 +169,9 @@ namespace sph
 					{
 						pairs_cache.push_back(particle_pair(a, b, r_length));
 						double additional_density=mass*math::w_poly6(r_length);
-//#pragma omp atomic
+						//#pragma omp atomic
 						a->density+=additional_density;
-//#pragma omp atomic
+						//#pragma omp atomic
 						b->density+=additional_density;
 					}
 				}
@@ -173,9 +181,7 @@ namespace sph
 
 	void fluid::calculate_densities()
 	{
-		if(simulator::detailed_logging)
-			logger::log("calculate densities general. %dx%d cells", grid->n_cells_x, grid->n_cells_y);
-//#pragma omp parallel for schedule(dynamic)
+		//#pragma omp parallel for schedule(dynamic)
 		for(int x=0;x<grid->n_cells_x;x++)
 		{
 			for(int y=0;y<grid->n_cells_y;y++)
@@ -187,13 +193,15 @@ namespace sph
 
 	void fluid::prepare_step()
 	{
+		max_force=DBL_MIN;
 		grid->fill(particles, n);
 		pairs_cache.clear();
 		for(int i=0;i<n;i++)
 		{
+			particles[i].col=particle::default_color;
 			particles[i].density=density;
 			particles[i].forces.Set(0,0);
-			particles[i].color_field_gradient=0;
+			particles[i].color_field_gradient=math::vec(0, 0);
 			particles[i].color_field_laplacian=0;
 		}
 	}
@@ -236,6 +244,7 @@ namespace sph
 
 	void fluid::enforce_glass( particle* p, double dt, math::vec& newpos )
 	{
+		/*
 		if(newpos.x<190)
 		{
 			double passed_time=(p->pos.x-190)/p->v.x;
@@ -248,12 +257,25 @@ namespace sph
 			p->v.x*=-wall_damping; //reversing direction
 			newpos.x=210-(dt-passed_time)*p->v.x;
 		}
+		*/
+		for(int j=0;j<physics::scenery.size();j++)
+		{
+			math::line l1=physics::scenery[j], l2=math::line(p->pos, newpos);
+			math::vec inter(0, 0);
+			bool r=math::intersection(l1, l2, inter);
+			if(r)
+			{
+				double passed_time=sqrt((p->pos-inter).LengthSq()/p->v.LengthSq());
+				p->v=p->v.deflect(l1)*wall_damping;
+				newpos=inter+p->v*(dt-passed_time);
+			}
+		}
 	}
 
 	void fluid::calculate_forces()
 	{
 		size_t pairs_cache_size=pairs_cache.size();
-//#pragma omp parallel for schedule(dynamic) 
+		//#pragma omp parallel for schedule(dynamic) 
 		for(int i=0;i<pairs_cache_size;i++)
 		{
 			calculate_forces(pairs_cache[i]);
@@ -290,9 +312,9 @@ namespace sph
 
 		double 
 			common_color_field_laplacian_term = mass * math::w_poly6_laplacian(r_length);
-//#pragma omp atomic
+		//#pragma omp atomic
 		a->color_field_laplacian+=common_color_field_laplacian_term / b->density;
-//#pragma omp atomic
+		//#pragma omp atomic
 		b->color_field_laplacian+=common_color_field_laplacian_term / a->density;
 		a->forces.atomic_increment(viscosity_force_a+pressure_force_a);
 		b->forces.atomic_increment(viscosity_force_b+pressure_force_b);
@@ -300,7 +322,7 @@ namespace sph
 
 	void fluid::update_positions( double dt )
 	{
-//#pragma omp parallel for schedule(dynamic)
+		//#pragma omp parallel for schedule(dynamic)
 		for(int i=0;i<n;i++)
 		{
 			//surface tension
@@ -321,6 +343,7 @@ namespace sph
 			}
 #endif
 			math::vec acceleration =  force / particles[i].density+physics::gravity;
+			max_force=std::max(max_force, (force+physics::gravity*particles[i].density).Length());
 			/*if(simulator::detailed_logging)
 			{
 			logger::log("%d: surface_tension: %s, pressure: %s, viscosity: %s, acceleration: %s", i, std::string(f_surface_tension).c_str(), std::string(particles[i].f_pressure).c_str(),	std::string(particles[i].f_viscosity).c_str(), std::string(acceleration).c_str());
@@ -340,29 +363,50 @@ namespace sph
 
 	void fluid::glass_common_update(boost::function<void (fluid*, particle*, math::vec)> f)
 	{
-//#pragma omp parallel for schedule(dynamic)
+		static const double pb_dist=std::min(glass_pushback_distance, smoothing_length);
+		//logger::log("glass pushback: %lf", pb_dist);
+		//#pragma omp parallel for schedule(dynamic)
 		for(int i=0;i<n;i++)
 		{
-			//glass
-			//vertical
-			if(particles[i].pos.y<glass_pushback_distance)
+			for(int j=0;j<physics::scenery.size();j++)
 			{
-				if(particles[i].pos.y<smoothing_length)
+				math::line l=physics::scenery[j];
+				math::vec proj=math::point_projection(l, particles[i].pos);
+				if(point_is_on_line_segment(l, proj))
 				{
-					f(this, &particles[i], math::vec(0, particles[i].pos.y));
+					double wall_dist=(particles[i].pos-proj).Length();
+					if(wall_dist<=pb_dist)
+					{
+						//logger::log("collision waiting to happen between (%.2lf, %.2lf) and ((%.2lf, %.2lf) -> (%.2lf, %.2lf)", particles[i].pos.x, particles[i].pos.y, l.a.x, l.a.y, l.b.x, l.b.y);
+						f(this, &particles[i], -(particles[i].pos-proj));
+					}
 				}
 			}
+			/*
+			//glass
+			//vertical
+			double wall_dist=pb_dist-particles[i].pos.y;
+
+			if(wall_dist>0)
+			{
+			//if(simulator::detailed_logging) logger::log("glass bottom:");
+			f(this, &particles[i], math::vec(0, wall_dist));
+			}
 			//horizontal
-			double wall_dist=particles[i].pos.x-190.0;
-			if(fabs(wall_dist)<smoothing_length)
+
+			wall_dist=190.0+pb_dist-particles[i].pos.x;
+			if(wall_dist>0)
 			{
-				f(this, &particles[i], math::vec(wall_dist, 0));
+			//if(simulator::detailed_logging) logger::log("glass sides:");
+			f(this, &particles[i], math::vec(wall_dist, 0));
 			}
-			wall_dist=particles[i].pos.x-210.0;
-			if(fabs(wall_dist)<smoothing_length)
+			wall_dist=particles[i].pos.x-(210.0-pb_dist);
+			if(wall_dist>0)
 			{
-				f(this, &particles[i], math::vec(wall_dist, 0));
+			//if(simulator::detailed_logging) logger::log("glass sides:");
+			f(this, &particles[i], math::vec(-wall_dist, 0));
 			}
+			*/
 		}
 
 	}
@@ -378,9 +422,10 @@ namespace sph
 		math::vec pressure_force=-mass*pressure*math::w_spiky_gradient(r, r.Length())/p->density*glass_density;
 		math::vec v_difference=-p->v;
 		math::vec viscosity_force = mass*eta*v_difference*math::w_viscosity_laplacian(r.Length())/p->density*glass_viscosity;
-		//logger::log("pressure: %s, viscosity: %s", ((std::string)(pressure_force)).c_str(), ((std::string)viscosity_force).c_str());
+		//if(simulator::detailed_logging) logger::log("pressure: %s, viscosity: %s", ((std::string)(pressure_force)).c_str(), ((std::string)viscosity_force).c_str());
 		math::vec forces=viscosity_force+pressure_force;
 		p->forces+=forces;
+		if(simulator::detailed_logging) logger::log("\tforces delta: (%lf, %lf)",forces.x, forces.y);
 
 	}
 
@@ -388,6 +433,32 @@ namespace sph
 	{
 		double additional_density=mass*math::w_poly6(r.Length());
 		p->density+=additional_density;
+	}
+
+	void fluid::set_bounding_particle_indices()
+	{
+		north_particle_idx=0, south_particle_idx=0, east_particle_idx=0, west_particle_idx=0;
+		//#pragma omp parallel for schedule(dynamic)
+		for(int i=1;i<n;i++)
+		{
+			if(particles[i].pos.x<particles[west_particle_idx].pos.x)
+			{
+				west_particle_idx=i;
+			}
+			if(particles[i].pos.y<particles[south_particle_idx].pos.y)
+			{
+				south_particle_idx=i;
+			}
+			if(particles[i].pos.x>particles[east_particle_idx].pos.x)
+			{
+				east_particle_idx=i;
+			}
+			if(particles[i].pos.y>particles[north_particle_idx].pos.y)
+			{
+				north_particle_idx=i;
+			}
+		}
+		particles[south_particle_idx].col=particles[north_particle_idx].col=particles[east_particle_idx].col=particles[west_particle_idx].col=graphics::colors::red;
 	}
 
 	void draw()
@@ -402,7 +473,29 @@ namespace sph
 
 	void particle::draw()
 	{
-		graphics::circle(pos, 1);
+		const float force_scale=30;
+		col.set_current();
+		if(col!=particle::default_color)
+		{
+			col=particle::default_color;
+			glTranslatef(0, 0, 0.5);
+			graphics::circle(pos, 1);
+			glTranslatef(0, 0, -0.5);
+		}
+		else
+		{
+			graphics::circle(pos, 1);
+		}
+		/*glBegin(GL_LINES);
+		glColor3f(1, 0, 0);
+		glVertex2f(pos.x, pos.y);
+		glVertex2f(pos.x+(forces.x/fluid::max_force)*force_scale, pos.y+(forces.y/fluid::max_force)*force_scale);
+		glEnd();*/
+	}
+
+	void particle::dump()
+	{
+		logger::log("\t{pos: (%.2lf, %.2lf), v: (%.2lf, %.2lf), force: (%.2lf, %.2lf)}", pos.x, pos.y, v.x, v.y, forces.x, forces.y);
 	}
 
 

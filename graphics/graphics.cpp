@@ -66,4 +66,15 @@ namespace graphics
 		glEnd();
 		circle(simulator::mousex, simulator::mousey );
 	}
+
+	void color::set_current()
+	{
+		glColor3f(r, g, b);
+	}
+
+	const bool color::operator!=( const color& rhs ) const
+	{
+		return (r!=rhs.r)||(g!=rhs.g)||(b!=rhs.b);
+	}
+
 }

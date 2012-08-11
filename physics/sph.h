@@ -3,6 +3,7 @@
 #include <vector>
 #include "math/vector.h"
 #include <boost/function.hpp>
+#include "graphics.h"
 
 namespace sph
 {
@@ -10,7 +11,10 @@ namespace sph
 	{
 		math::vec pos, v, forces, color_field_gradient;
 		double density, color_field_laplacian;
+		graphics::color col;
+		const static graphics::color default_color;
 		inline void draw();
+		inline void dump();
 	};
 
 	struct particle_pair
@@ -45,6 +49,8 @@ namespace sph
 		particle_grid* grid;
 		double eta, sigma, mass, smoothing_length, density, k, gradient_length_treshold, damping, rest_density, wall_damping;
 		double glass_pushback_distance, glass_pushback_minimum_pressure, glass_density, glass_viscosity;
+		int north_particle_idx, south_particle_idx, east_particle_idx, west_particle_idx;
+		static double max_force;
 		int n;
 		fluid(int particles_x, int particles_y, double spacing_x, double spacing_y, math::vec pos );
 		~fluid();
@@ -62,6 +68,7 @@ namespace sph
 		void update_positions(double dt);
 		void enforce_walls(particle* p, double dt, math::vec& newpos);
 		void enforce_glass(particle* p, double dt, math::vec& newpos);
+		void set_bounding_particle_indices();
 		void draw();
 	};
 	extern std::vector<fluid> fluids;

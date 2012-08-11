@@ -2,7 +2,7 @@
 
 #include "config.h"
 #include "graphics.h"
-#include "line.h"
+#include "math/line.h"
 #include "sph.h"
 #include <boost/foreach.hpp>
 #include <cmath>
@@ -11,7 +11,7 @@
 namespace physics
 {
 	math::vec gravity;
-	std::vector<line> scenery;
+	std::vector<math::line> scenery;
 	std::vector<black_hole> black_holes;
 	bool blackholes_enabled=false;
 	double cell_size=4;
@@ -29,7 +29,7 @@ namespace physics
 				{
 					vertices.push_back(math::vec(vert.second.get<float>("x"), vert.second.get<float>("y")));
 				}
-				scenery.push_back(line(vertices[0], vertices[1]));
+				scenery.push_back(math::line(vertices[0], vertices[1]));
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace physics
 
 	void draw()
 	{
-		for(line& l: scenery)
+		for(math::line& l: scenery)
 		{
 			l.draw();
 		}

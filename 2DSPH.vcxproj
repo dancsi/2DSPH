@@ -81,7 +81,7 @@
       <FloatingPointModel>Precise</FloatingPointModel>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <OpenMPSupport>false</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -97,7 +97,7 @@
     <ClCompile Include="graphics\graphics.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="physics\black_hole.cpp" />
-    <ClCompile Include="physics\line.cpp" />
+    <ClCompile Include="math\line.cpp" />
     <ClCompile Include="physics\obj.cpp" />
     <ClCompile Include="physics\physics.cpp" />
     <ClCompile Include="physics\sph.cpp" />
@@ -108,12 +108,12 @@
     <ClInclude Include="graphics.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="math\kernels.h" />
+    <ClInclude Include="math\line.h" />
     <ClInclude Include="math\vec2.h" />
     <ClInclude Include="math\vector.h" />
     <ClInclude Include="physics.h" />
     <ClInclude Include="physics\black_hole.h" />
     <ClInclude Include="physics\circle.h" />
-    <ClInclude Include="physics\line.h" />
     <ClInclude Include="physics\obj.h" />
     <ClInclude Include="physics\sph.h" />
     <ClInclude Include="simulator.h" />

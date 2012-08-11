@@ -12,7 +12,7 @@ namespace math
 	public:
 		vec2(void){}
 
-		vec2(double length)
+		/*vec2(double length)
 		{
 			int xSign = rand()%10>5 ? 1 : -1;
 			int ySign = rand()%10>5 ? 1 : -1;
@@ -23,7 +23,7 @@ namespace math
 			Normalise();
 			x*=length;
 			y*=length;
-		}
+		}*/
 
 		vec2(double Ix,double Iy): x(Ix), y(Iy){}
 
@@ -126,6 +126,16 @@ namespace math
 			*this = trans + D;
 			return *this;
 		}
+		vec2 project_on(const vec2& v)
+		{
+			return (v*(*this))/v.LengthSq()*v;
+		}
+
+		vec2 deflect(const vec2& surface)
+		{
+			return *this-2*(*this-project_on(surface));
+		}
+
 		operator std::string()
 		{
 			char buf[100];
