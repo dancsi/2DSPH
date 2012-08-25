@@ -170,3 +170,6 @@ pip-log.txt
 *.log
 *.synctex
 *.sav
+*.bbl
+*.blg
+
