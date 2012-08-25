@@ -55,6 +55,19 @@
                         "y": 600
                     }
                 ]
+            },
+            {
+                "type": "line",
+                "vertices": [
+                    {
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "x": 800,
+                        "y": 0
+                    }
+                ]
             }
         ],
         "movable": []
@@ -77,7 +90,7 @@
             "k": 250,
             "smoothing_length": 3,
             "gradient_length_treshold": 0.075000003,
-            "glass_pushback_distance": 0.05,
+            "glass_pushback_distance": 1,
             "glass_pushback_minimum_pressure": 0.01,
             "glass_density": 2,
             "glass_viscosity": 1.2

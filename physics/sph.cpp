@@ -106,12 +106,10 @@ namespace sph
 		update_positions(dt);
 		set_bounding_particle_indices();
 
-		logger::log("northmost particle: %d", north_particle_idx);
-		//particles[north_particle_idx].dump();
-		//particles[south_particle_idx].dump();
-		//particles[west_particle_idx].dump();
-		//particles[east_particle_idx].dump();
-		//if(particles[east_particle_idx])
+		for(int i=0;i<n;i++)
+		{
+			if()
+		}
 	}
 
 	void fluid::calculate_densities( int x, int y)
@@ -214,7 +212,7 @@ namespace sph
 		}
 	}
 
-	void fluid::enforce_walls( particle* p, double dt, math::vec& newpos )
+	void fluid::enforce_walls( particle* p, double& dt, math::vec& newpos )
 	{
 		if(newpos.x<0)
 		{
@@ -242,7 +240,7 @@ namespace sph
 		}
 	}
 
-	void fluid::enforce_glass( particle* p, double dt, math::vec& newpos )
+	void fluid::enforce_glass( particle* p, double& dt, math::vec& newpos )
 	{
 		/*
 		if(newpos.x<190)
@@ -260,14 +258,31 @@ namespace sph
 		*/
 		for(int j=0;j<physics::scenery.size();j++)
 		{
-			math::line l1=physics::scenery[j], l2=math::line(p->pos, newpos);
+			math:: line l2=math::line(p->pos, newpos);
+			sort(physics::scenery.begin()+j, physics::scenery.end(), [&] (math::line& a, math::line& b) -> bool {
+					math::vec inter_a(0, 0), inter_b(0, 0);
+					bool r_a=math::intersection(a, l2, inter_a), r_b=math::intersection(b, l2, inter_b);
+					if(!r_a && !r_b)
+					{
+						return true;
+					}
+					else
+					{
+						if(!r_b) return true;
+						if(!r_a) return false;
+						return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();
+					}
+				});
+			math::line l1=physics::scenery[j]; 
 			math::vec inter(0, 0);
 			bool r=math::intersection(l1, l2, inter);
 			if(r)
 			{
 				double passed_time=sqrt((p->pos-inter).LengthSq()/p->v.LengthSq());
 				p->v=p->v.deflect(l1)*wall_damping;
-				newpos=inter+p->v*(dt-passed_time);
+				dt-=passed_time;
+				p->pos=inter;
+				newpos=inter+p->v*(dt);
 			}
 		}
 	}
@@ -352,9 +367,11 @@ namespace sph
 			particles[i].v=pow(damping, dt)*particles[i].v+acceleration*dt;
 
 			math::vec newpos = particles[i].pos+0.5*(old_v+particles[i].v)*dt;
+			 
+			double deltat=dt;
 
-			enforce_walls(&particles[i], dt, newpos);
-			enforce_glass(&particles[i], dt, newpos);
+			enforce_walls(&particles[i], deltat, newpos);
+			//enforce_glass(&particles[i], deltat, newpos);
 
 			particles[i].pos=newpos;
 			//logger::log("(%.2lf, %.2lf) ", particles[i].pos.x, particles[i].pos.y);
@@ -424,6 +441,7 @@ namespace sph
 		math::vec viscosity_force = mass*eta*v_difference*math::w_viscosity_laplacian(r.Length())/p->density*glass_viscosity;
 		//if(simulator::detailed_logging) logger::log("pressure: %s, viscosity: %s", ((std::string)(pressure_force)).c_str(), ((std::string)viscosity_force).c_str());
 		math::vec forces=viscosity_force+pressure_force;
+		//forces*=100;
 		p->forces+=forces;
 		if(simulator::detailed_logging) logger::log("\tforces delta: (%lf, %lf)",forces.x, forces.y);
 

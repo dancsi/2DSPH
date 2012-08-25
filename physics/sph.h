@@ -66,8 +66,8 @@ namespace sph
 		void calculate_forces(particle_pair p);
 		void calculate_glass_fluid_forces(particle* p, math::vec r);
 		void update_positions(double dt);
-		void enforce_walls(particle* p, double dt, math::vec& newpos);
-		void enforce_glass(particle* p, double dt, math::vec& newpos);
+		void enforce_walls(particle* p, double& dt, math::vec& newpos);
+		void enforce_glass(particle* p, double& dt, math::vec& newpos);
 		void set_bounding_particle_indices();
 		void draw();
 	};

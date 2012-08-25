@@ -164,3 +164,9 @@ pip-log.txt
 
 *.dll
 *.lib
+
+#LaTeX
+*.aux
+*.log
+*.synctex
+*.sav
