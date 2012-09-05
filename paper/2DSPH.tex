@@ -8,6 +8,9 @@
     {Abstrakt}%
 }
 
+\let\oldvec\vec
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+
 \title{Simulacija te\v cnosti u dve dimenzije}
 \author{
         Daniel Sila\dj i \\
@@ -24,26 +27,57 @@ This is the paper's abstract \ldots
 \end{abstract}
 
 \section{Uvod}\label{uvod}
-    Razni fluidi ( ) su oduvek bili sastavni deo na\v sih \v zivota, pa je pored sveop\v steg razvoja tehnologije bilo pitanje vremena kad \'ce \v covek po\v zeleti da predvidi njihovo kretanje, odnosno -- da ih simulira.
-    Prirodno, i simulacije su postale deo na\v sih \v zivota, i to, sa jedne strane u vidu vremenske prognoze, aerodinami\v cki oblikovanih automobila, aviona i raketa, a sa druge strane kao specijalni efekti u filmovima i kompjuterskim igrama.
+    Razni fluidi ( ) su oduvek bili sastavni deo na\v sih \v zivota, pa je pored sveop\v steg razvoja tehnologije bilo pitanje vremena kad \'ce \v covek po\v zeleti da predvidi njihovo kretanje, odnosno -- da ih simulira. Prirodno, i simulacije su postale deo na\v sih \v zivota, i to, sa jedne strane u vidu vremenske prognoze, aerodinami\v cki oblikovanih automobila, aviona i raketa, a sa druge strane kao specijalni efekti u filmovima i kompjuterskim igrama.
 
     \subsection{Istorija}\label{istorija}
         Prve korake u ovoj oblasti su napravili Claude-Louis Navier i George Gabriel Stokes 1822, postaviv\v si Navier-Stoksove jedna\v cine.
-        One \v cine osnovu mnogih modela atmosfere, okeana, vodovoda, krvotoka, a koriste se i u ispitivanju aerodinami\v cnosti aviona i automobila.
-        Ipak, ove jedna\v cine imaju jedan veliki nedostatak: ne zna se da li imaju re\v senje za proizvoljno stanje fluida u 3 dimenzije.
-        \v Stavi\v se, to pitanje predstavlja jedan od sedam milenijumskih problema Clayovog instituta za matematiku.
-        Zbog toga se i danas radi na pronala\v zenju \v sto br\v zih (za izra\v cunavanje), ili \v sto preciznijih aproksimacija ovih jedna\v cina, koje nam garantuju da \'ce re\v senje postojati.
+        One \v cine osnovu mnogih modela atmosfere, okeana, vodovoda, krvotoka, a koriste se i u ispitivanju aerodinami\v cnosti aviona i automobila. Ipak, ove jedna\v cine imaju jedan veliki nedostatak: ne zna se da li imaju re\v senje za proizvoljno stanje fluida u 3 dimenzije. \v Stavi\v se, to pitanje predstavlja jedan od sedam milenijumskih problema Clayovog instituta za matematiku. Zbog toga se i danas radi na pronala\v zenju \v sto br\v zih (za izra\v cunavanje), ili \v sto preciznijih aproksimacija ovih jedna\v cina, koje nam garantuju da \'ce re\v senje postojati.
 
         Prve kompjuterske simulacije su bile delo stru\v cnjaka iz NASA-e, ustanove koja je u tom trenutku jedina imala kompjutere dovoljno jake da simuliraju vazduh u realnom vremenu, pa makar to bilo u dve dimenzije. Bitan pomak u re\v savanju Navier-Stokesovih jedna\v cina u 3D na\v cinjen je u \cite{Foster:1996:RAL:244304.244315}, oslanjaju\'ci se na \cite{harlow:2182}.
 
         Osnovu ovog rada \v cini metod Smoothed Particle Hydrodynamics (SPH), otkriven 1977, nezavisno u \cite{1977MNRAS.181..375G} i \cite{1977AJ.....82.1013L}. U oba rada SPH je iskori\v s\'cen za modeliranje zvezda, i zbog toga nije pravljen da radi u realnom vremenu. Tek u \cite{Muller:2003:PFS:846276.846298} je dat pojednostavljeni algoritam, pogodan za izvr\v savanje u realnom vremenu.
 
     \subsection{Motivacija i ostala veselja}\label{motivacija}
-        blabla 
+        blabla
 
 \section{Kori\v s\'cene metode}
-    
+    \subsection{Osnovni pojmovi iz dinamike fluida}
+        U ovom delu je dat kratak pregled matemati\v ckih i fizi\v ckih pojmova koji je pojavljuju u Navier-Stokesovim jedna\v cinama i jedna\v cinama SPH.
+        \label{definicije}
+        \begin{description}
+          \item[Gustina, $\rho$] predstavlja masu jedini\v cne zapremine neke supstance, odnosno $\rho = \frac{m}{V}$.
+          \item[Pritisak, $p$] je skalarna veli\v cina koja je brojno jednaka sili koja deluje normalno na jedini\v cnu povr\v sinu, odnosno $p = \frac{F}{A}$
+          \item[Viskozitet] je mera unutra\v snjeg trenja izme\dj u slujeva te\v cnosti. Karakteri\v se ga koeficijent viskoziteta, $\mu$.
+          \item[Povr\v sinski napon] je te\v znja te\v cnosti da zauzme \v sto manju slobodnu povr\v sinu. Karakteri\v se ga koeficijent povr\v sinskog napona, $\sigma$.
+          \item[Gradijent] neke skalarne funkcije je vektorsko polje koje u svakoj ta\v cki pokazuje u smeru najve\'ceg porasta, i ima intenzitet jednak tom porastu. Matemati\v cki, za funkciju $f(x, y, z)$:
+                $$\nabla f=\frac{\partial f}{\partial x}\vec{i} + \frac{\partial f}{\partial y}\vec{j} + \frac{\partial f}{\partial z}\vec{k}$$ pri \v cemu se $\vec{i}, \vec{j}, \vec{k}$ jedini\v cni vektori u tri dimenzije.
+          \item[Divergencija] vektorskog polja $\vec{v}(x, y, z)=v_x\vec{i}+v_y\vec{j}+v_z\vec{k}$ je skalarna funkcija
+                $$\text{div} \vec{v} = \nabla \cdot \vec{v} = \frac{\partial v_x}{\partial x} + \frac{\partial v_y}{\partial y} + \frac{\partial v_z}{\partial z}$$
+          \item[Laplaceov operator]
+        \end{description}
+    \subsection{Navier-Stokesova jedna\v cina}
+        U op\v stem slu\v caju, Navier-Stokesova jedna\v cina izgleda ovako:
+        $$ \rho(\frac{\delta \vec{v}}{\delta t} + \vec{v} \cdot \nabla \vec{v}) = -\nabla p + \nabla \cdot \vec{T} + \vec{F} $$
+        Iako mo\v zda na prvi pogled deluje komplikovano, ona u stvari predstavlja drugi Newtonov zakon za kretanje fluida. Tako\dj e, za potrebe ovog rada je dovoljna pojednostavljena verzija jedna\v cine, koja se odnosi na Newtonovske fluide, nesti\v sljivog toka. Njeno izvo\dj enje sledi.
 
+        Krenimo od dobro poznatog drugog Newtonovog zakona,
+            $$\vec{F}=m\vec{a}$$
+        Zamenimo ubrzanje sa materijalnim izvodom brzine po vremenu ($\vec{a} = \frac{D\vec{v}}{Dt}$), a masu sa gustinom:
+            $$\vec{F}=\rho\frac{D\vec{v}}{Dt}=\rho(\frac{\delta \vec{v}}{\delta t} + \vec{v} \cdot \nabla \vec{v})$$
+        Sa druge strane, sile koje deluju na fluid mo\v zemo da podelimo na unutra\v snje (viskozitet, povr\v sinski napon,...) i spolja\v snje (gravitacija,...). Za po\v cetak, neka je gravitaciona sila $\rho \vec{g}$
+        $$\rho \vec{g} + \vec{F}_{\text{unutra\v snje}}=\rho\frac{D\vec{v}}{Dt}=\rho(\frac{\delta \vec{v}}{\delta t} + \vec{v} \cdot \nabla \vec{v})$$
+        \v Sto se ti\v ce unutra\v snjih sila, radi pojednostavljivanja jedna\v cina (pa samim tim i njihovog re\v savanja), u daljem tekstu \'ce se koristiti dve pretpostavke:
+        \begin{enumerate}
+          \item Fluid je Newtonovski
+          \item Fluid ima nesti\v sljiv tok
+        \end{enumerate}
+        \v Cinjenica da je fluid Newtonovski nam govori da je viskoznost konstantna, ondnosno ne zavisi od tangencijalnog napona u fluidu, a iz definicije nesti\v sljivog toka znamo da je divergencija polja brzina jednaka nuli ($\nabla \cdot \vec v = 0$). Zato, unutra\v snje sile mo\v zemo podeliti na one izazvane razlikom u pritiscima (normalni napon), i na viskozne sile izazvane razlikom u brzinama (tangencijalni napon)\cite{particle-fluids}. U ovom slu\v caju, sile izazvane razlikom pritisaka mo\v zemo predstaviti negativnim gradijentom pritiska ($-\nabla p$), a viskozne sile sa $\mu\nabla\cdot\nabla\vec{v}=\mu\nabla^2\vec{v}$, i tako dobijamo kona\v cnu Navier-Stokesovu jedna\v cinu za Newtonovske fluide nesti\v sljivog toka:
+        $$ \underbrace{\rho}_{\text{gustina}} \overbrace{(\underbrace{\frac{\delta \vec{v}}{\delta t}}_{\text{ubrzanje deli\'ca fluida}} + \underbrace{\vec{v} \cdot \nabla \vec{v}}_{\text{konvektivno ubrzanje}})}^{\text{ubrzanje}} = \underbrace{-\nabla p}_{\text{gradijent pritiska}} + \underbrace{\mu\nabla^2\vec{v}}_{\text{viskozitet}} + \underbrace{\vec{F}}_{\text{spolja\v snje sile}} $$
+    \subsection{Smoothed particle hydrodynamics}
+        Glavna prepreka u svim Lagrangeovskim algoritmima za simuliranje fluida le\v zi u \v cinjenici da je za fizi\v cki potpuno vernu simulaciju potrebno simulirati prakti\v cno neograni\v cen broj \v cestica. SPH taj problem prevazilazi tako \v sto vrednost neke fizi\v ske veli\v cine $A$ u nekoj ta\v cki $\vec{r}$ interpolira iz diskretnog skupa ta\v caka (na pozicijama $\vec{r}_i$) za koje smo ve\'c izra\v cunali vrednost $A_i$.
+            $$A_\text{interpolirano}(\vec{r}) = \sum_i{A_i V_i W(\vec{r}-\vec{r}_i, h)} = \sum_i{A_i \frac{m_i}{\rho_i} W(\vec{r}-\vec{r}_i, h)}$$
+        Jasno je da svaka "\v cestica" u\v cestvovati u $A_\text{interpolirano}$ srazmerno svojoj zapremini i vrednosti funkcije $W$ na udaljenosti $\vec{r}-\vec{r}_i$ od date ta\v cke $\vec{r}$
+\newpage
 \bibliographystyle{abbrv}
 \bibliography{2DSPH}
 
