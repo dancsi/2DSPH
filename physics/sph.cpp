@@ -105,11 +105,6 @@ namespace sph
 		/*STEP 3: move particles*/
 		update_positions(dt);
 		set_bounding_particle_indices();
-
-		for(int i=0;i<n;i++)
-		{
-			if()
-		}
 	}
 
 	void fluid::calculate_densities( int x, int y)
@@ -256,15 +251,16 @@ namespace sph
 			newpos.x=210-(dt-passed_time)*p->v.x;
 		}
 		*/
-		for(int j=0;j<physics::scenery.size();j++)
+		bool r=true;
+		while(dt>0 && r)
 		{
 			math:: line l2=math::line(p->pos, newpos);
-			sort(physics::scenery.begin()+j, physics::scenery.end(), [&] (math::line& a, math::line& b) -> bool {
+			auto it =min_element(physics::scenery.begin(), physics::scenery.end(), [&] (math::line& a, math::line& b) -> bool {
 					math::vec inter_a(0, 0), inter_b(0, 0);
 					bool r_a=math::intersection(a, l2, inter_a), r_b=math::intersection(b, l2, inter_b);
 					if(!r_a && !r_b)
 					{
-						return true;
+						return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();;
 					}
 					else
 					{
@@ -273,16 +269,19 @@ namespace sph
 						return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();
 					}
 				});
-			math::line l1=physics::scenery[j]; 
+			math::line l1=*it; 
 			math::vec inter(0, 0);
-			bool r=math::intersection(l1, l2, inter);
+			r=math::intersection(l1, l2, inter);
 			if(r)
 			{
 				double passed_time=sqrt((p->pos-inter).LengthSq()/p->v.LengthSq());
+				math::vec oldv=p->v;
 				p->v=p->v.deflect(l1)*wall_damping;
 				dt-=passed_time;
+				math::vec oldpos=p->pos;
 				p->pos=inter;
 				newpos=inter+p->v*(dt);
+				logger::log("deflected particle with (p=%s, v=%s), from wall (%s -> %s) to (p=%s, v=%s)", oldpos.c_str(), oldv.c_str(), l1.a.c_str(), l1.b.c_str(), p->pos.c_str(), p->v.c_str());
 			}
 		}
 	}
@@ -371,7 +370,7 @@ namespace sph
 			double deltat=dt;
 
 			enforce_walls(&particles[i], deltat, newpos);
-			//enforce_glass(&particles[i], deltat, newpos);
+			enforce_glass(&particles[i], deltat, newpos);
 
 			particles[i].pos=newpos;
 			//logger::log("(%.2lf, %.2lf) ", particles[i].pos.x, particles[i].pos.y);

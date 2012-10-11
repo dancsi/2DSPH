@@ -7,6 +7,12 @@ namespace math
 {
 	class vec2
 	{
+	private:
+		static char buf[100];
+		void print_to_buf()
+		{
+			sprintf(buf, "(%.2lf, %.2lf)", x, y);
+		}
 	public:
 		double x,y;
 	public:
@@ -138,9 +144,13 @@ namespace math
 
 		operator std::string()
 		{
-			char buf[100];
-			sprintf(buf, "(%.2lf, %.2lf)", x, y);
+			print_to_buf();
 			return std::string(buf);
+		}
+		const char* c_str()
+		{
+			print_to_buf();
+			return buf;
 		}
 	};
 }

@@ -96,6 +96,7 @@
     <ClCompile Include="config\config.cpp" />
     <ClCompile Include="graphics\graphics.cpp" />
     <ClCompile Include="logger.cpp" />
+    <ClCompile Include="math\vec2.cpp" />
     <ClCompile Include="physics\black_hole.cpp" />
     <ClCompile Include="math\line.cpp" />
     <ClCompile Include="physics\obj.cpp" />
