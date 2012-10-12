@@ -96,11 +96,13 @@
     <ClCompile Include="config\config.cpp" />
     <ClCompile Include="graphics\graphics.cpp" />
     <ClCompile Include="logger.cpp" />
+    <ClCompile Include="math\kernels.cpp" />
     <ClCompile Include="math\vec2.cpp" />
     <ClCompile Include="physics\black_hole.cpp" />
     <ClCompile Include="math\line.cpp" />
     <ClCompile Include="physics\obj.cpp" />
     <ClCompile Include="physics\particle.cpp" />
+    <ClCompile Include="physics\particle_glas_interaction.cpp" />
     <ClCompile Include="physics\particle_grid.cpp" />
     <ClCompile Include="physics\physics.cpp" />
     <ClCompile Include="physics\sph.cpp" />
