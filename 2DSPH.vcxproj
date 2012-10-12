@@ -44,12 +44,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir);C:\Boost\include\boost-1_50;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);C:\Boost\include\boost-1_50;$(VCInstallDir)include\SDL;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Boost\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir);C:\Boost\include\boost-1_50;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);C:\Boost\include\boost-1_50;$(VCInstallDir)include\SDL;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Boost\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -100,6 +100,8 @@
     <ClCompile Include="physics\black_hole.cpp" />
     <ClCompile Include="math\line.cpp" />
     <ClCompile Include="physics\obj.cpp" />
+    <ClCompile Include="physics\particle.cpp" />
+    <ClCompile Include="physics\particle_grid.cpp" />
     <ClCompile Include="physics\physics.cpp" />
     <ClCompile Include="physics\sph.cpp" />
     <ClCompile Include="simulator.cpp" />
@@ -116,6 +118,8 @@
     <ClInclude Include="physics\black_hole.h" />
     <ClInclude Include="physics\circle.h" />
     <ClInclude Include="physics\obj.h" />
+    <ClInclude Include="physics\particle.h" />
+    <ClInclude Include="physics\particle_grid.h" />
     <ClInclude Include="physics\sph.h" />
     <ClInclude Include="simulator.h" />
   </ItemGroup>

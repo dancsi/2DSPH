@@ -234,46 +234,47 @@ namespace sph
 			newpos.y=simulator::height-(dt-passed_time)*p->v.y;
 		}
 	}
-
+//#define OLD_WALLS_COLLISION
 	void fluid::enforce_glass( particle* p, double& dt, math::vec& newpos )
 	{
-		/*
+#ifdef OLD_WALLS_COLLISION
 		if(newpos.x<190)
 		{
-			double passed_time=(p->pos.x-190)/p->v.x;
-			p->v.x*=-wall_damping; //reversing direction
-			newpos.x=190+(dt-passed_time)*p->v.x;
+		double passed_time=(p->pos.x-190)/p->v.x;
+		p->v.x*=-wall_damping; //reversing direction
+		newpos.x=190+(dt-passed_time)*p->v.x;
 		}
 		else if(newpos.x>210)
 		{
-			double passed_time=(210-p->pos.x)/p->v.x;
-			p->v.x*=-wall_damping; //reversing direction
-			newpos.x=210-(dt-passed_time)*p->v.x;
+		double passed_time=(210-p->pos.x)/p->v.x;
+		p->v.x*=-wall_damping; //reversing direction
+		newpos.x=210-(dt-passed_time)*p->v.x;
 		}
-		*/
-		bool r=true;
+#else
+		bool r=true, printed=false;
 		while(dt>0 && r)
 		{
 			math:: line l2=math::line(p->pos, newpos);
 			auto it =min_element(physics::scenery.begin(), physics::scenery.end(), [&] (math::line& a, math::line& b) -> bool {
-					math::vec inter_a(0, 0), inter_b(0, 0);
-					bool r_a=math::intersection(a, l2, inter_a), r_b=math::intersection(b, l2, inter_b);
-					if(!r_a && !r_b)
-					{
-						return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();;
-					}
-					else
-					{
-						if(!r_b) return true;
-						if(!r_a) return false;
-						return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();
-					}
-				});
+				math::vec inter_a(0, 0), inter_b(0, 0);
+				bool r_a=math::intersection(a, l2, inter_a), r_b=math::intersection(b, l2, inter_b);
+				if(!r_a && !r_b)
+				{
+					return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();;
+				}
+				else
+				{
+					if(!r_b) return true;
+					if(!r_a) return false;
+					return (p->pos-inter_a).LengthSq()<(p->pos-inter_b).LengthSq();
+				}
+			});
 			math::line l1=*it; 
 			math::vec inter(0, 0);
 			r=math::intersection(l1, l2, inter);
 			if(r)
 			{
+				if(!printed){printed=true; logger::log("particle %p", p);}
 				double passed_time=sqrt((p->pos-inter).LengthSq()/p->v.LengthSq());
 				math::vec oldv=p->v;
 				p->v=p->v.deflect(l1)*wall_damping;
@@ -281,9 +282,11 @@ namespace sph
 				math::vec oldpos=p->pos;
 				p->pos=inter;
 				newpos=inter+p->v*(dt);
-				logger::log("deflected particle with (p=%s, v=%s), from wall (%s -> %s) to (p=%s, v=%s)", oldpos.c_str(), oldv.c_str(), l1.a.c_str(), l1.b.c_str(), p->pos.c_str(), p->v.c_str());
+				logger::log("deflected particle with (p=%s, v=%s), from wall (%s -> %s) to (p=%s, v=%s)", std::string(oldpos).c_str(), std::string(oldv).c_str(), std::string(l1.a).c_str(), std::string(l1.b).c_str(), std::string(p->pos).c_str(), std::string(p->v).c_str());
 			}
 		}
+		if(printed) __debugbreak();
+#endif
 	}
 
 	void fluid::calculate_forces()
@@ -366,7 +369,7 @@ namespace sph
 			particles[i].v=pow(damping, dt)*particles[i].v+acceleration*dt;
 
 			math::vec newpos = particles[i].pos+0.5*(old_v+particles[i].v)*dt;
-			 
+
 			double deltat=dt;
 
 			enforce_walls(&particles[i], deltat, newpos);
@@ -486,107 +489,5 @@ namespace sph
 			f.draw();
 		}
 	}
-
-
-	void particle::draw()
-	{
-		const float force_scale=30;
-		col.set_current();
-		if(col!=particle::default_color)
-		{
-			col=particle::default_color;
-			glTranslatef(0, 0, 0.5);
-			graphics::circle(pos, 1);
-			glTranslatef(0, 0, -0.5);
-		}
-		else
-		{
-			graphics::circle(pos, 1);
-		}
-		/*glBegin(GL_LINES);
-		glColor3f(1, 0, 0);
-		glVertex2f(pos.x, pos.y);
-		glVertex2f(pos.x+(forces.x/fluid::max_force)*force_scale, pos.y+(forces.y/fluid::max_force)*force_scale);
-		glEnd();*/
-	}
-
-	void particle::dump()
-	{
-		logger::log("\t{pos: (%.2lf, %.2lf), v: (%.2lf, %.2lf), force: (%.2lf, %.2lf)}", pos.x, pos.y, v.x, v.y, forces.x, forces.y);
-	}
-
-
-	particle_grid::particle_grid( double _cell_size ) : 
-		cell_width(_cell_size), 
-		min_corner(math::vec(DBL_MAX, DBL_MAX)), 
-		max_corner(math::vec(DBL_MIN, DBL_MIN)),
-		n_cells(0), n_cells_x(0), n_cells_y(0)
-	{
-		cells.reserve(initial_capacity);
-	}
-
-	void particle_grid::fill( particle* particles, size_t n_particles )
-	{
-		if(simulator::detailed_logging) 
-			logger::log("filling with %d particles", n_particles);
-		for(size_t i=0;i<n_cells;i++)
-		{
-			if(cells[i]!=nullptr)
-			{
-				delete cells[i];
-				cells[i]=nullptr;
-			}
-		}
-		particle_grid::n_particles=n_particles;
-		set_bounds(particles, n_particles);
-		n_cells_x=size_t((max_corner.x-min_corner.x+cell_width)/cell_width);
-		n_cells_y=size_t((max_corner.y-min_corner.y+cell_width)/cell_width);
-		n_cells=n_cells_x*n_cells_y;
-		if(simulator::detailed_logging)
-			logger::log("calculated bounds -> %dx%d grid.\n\tcorners: (%lf, %lf), (%lf, %lf), cell width: %.2lf", n_cells_x, n_cells_y, min_corner.x, min_corner.y, max_corner.x, max_corner.y, cell_width);
-		cells.resize(n_cells);
-
-		for(int i=0;i<n_particles;i++)
-		{
-			size_t idx=get_cell_index(particles[i].pos);
-			if(idx==invalid_index) continue;
-			if(cells[idx]==nullptr)
-			{
-				cells[idx]=new cell();
-				cells[idx]->reserve(initial_capacity);
-			}
-			cells[idx]->push_back(&particles[i]);
-		}
-	}
-
-	void particle_grid::set_bounds( particle* particles, size_t n_particles )
-	{
-		min_corner.Set(DBL_MAX, DBL_MAX);
-		max_corner.Set(DBL_MIN, DBL_MIN);
-
-		for(int i=0;i<n_particles;i++)
-		{
-			math::vec pos=particles[i].pos;
-			if(pos.x<min_corner.x) min_corner.x=pos.x;
-			if(pos.y<min_corner.y) min_corner.y=pos.y;
-			if(pos.x>max_corner.x) max_corner.x=pos.x;
-			if(pos.y>max_corner.y) max_corner.y=pos.y;
-		}
-	}
-
-	size_t particle_grid::get_cell_index( math::vec particle_pos )
-	{
-		size_t idx_x=size_t((particle_pos.x-min_corner.x)/cell_width);
-		size_t idx_y=size_t((particle_pos.y-min_corner.y)/cell_width);
-		return get_cell_index(idx_x, idx_y);
-	}
-
-	size_t particle_grid::get_cell_index( size_t idx_x, size_t idx_y )
-	{
-		if(idx_x>=n_cells_x||idx_y>=n_cells_y)
-			return invalid_index;
-		return n_cells_y*idx_x+idx_y;
-	}
-
 
 };

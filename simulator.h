@@ -8,9 +8,6 @@
 /* SDL */
 #include <SDL.h>
 #include <SDL_opengl.h>
-#ifndef SHITTY_SDL_DEFINE
-#  undef main
-#endif
 
 /* INTERNAL INCLUDES */
 
