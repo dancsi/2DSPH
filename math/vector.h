@@ -4,6 +4,8 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 
+#define STR(x) std::string(x).c_str()
+
 namespace math
 {
 	using namespace DirectX;

@@ -80,24 +80,39 @@ namespace sph
 			p->v.y*=-1; //reversing direction
 			newpos.y=simulator::height-(dt-passed_time)*p->v.y;
 		}
+
+		p->pos=newpos;
 	}
 	void fluid::enforce_glass( particle* p, double& dt, math::vec& newpos )
 	{
-#ifdef OLD_WALLS_COLLISION
+		/*
 		if(newpos.x<190)
 		{
-			double passed_time=(p->pos.x-190)/p->v.x;
-			p->v.x*=-wall_damping; //reversing direction
-			newpos.x=190+(dt-passed_time)*p->v.x;
+		double passed_time=(p->pos.x-190)/p->v.x;
+		p->v.x*=-wall_damping; //reversing direction
+		newpos.x=190+(dt-passed_time)*p->v.x;
 		}
 		else if(newpos.x>210)
 		{
-			double passed_time=(210-p->pos.x)/p->v.x;
-			p->v.x*=-wall_damping; //reversing direction
-			newpos.x=210-(dt-passed_time)*p->v.x;
+		double passed_time=(210-p->pos.x)/p->v.x;
+		p->v.x*=-wall_damping; //reversing direction
+		newpos.x=210-(dt-passed_time)*p->v.x;
 		}
-#else
-		bool r=true, printed=false;
+		*/
+
+		bool critical_particle=false;
+
+		if(newpos.x<190.0) critical_particle=true;
+		if(newpos.x>210.0) critical_particle=true;
+		//critical_particle=false;
+		if(critical_particle)
+		{
+			logger::log("critical particle %p\n", p);
+			logger::log("pos=%s, v=%s, newpos=%s", STR(p->pos), STR(p->v), STR(newpos));
+		}
+
+		//#define DEBUGGING
+		bool r=true;
 		while(dt>0 && r)
 		{
 			math:: line l2=math::line(p->pos, newpos);
@@ -120,19 +135,29 @@ namespace sph
 			r=math::intersection(l1, l2, inter);
 			if(r)
 			{
-				if(!printed){printed=true; logger::log("particle %p", p);}
+
 				double passed_time=sqrt((p->pos-inter).LengthSq()/p->v.LengthSq());
 				math::vec oldv=p->v;
 				p->v=p->v.deflect(l1)*wall_damping;
 				dt-=passed_time;
 				math::vec oldpos=p->pos;
 				p->pos=inter;
-				newpos=inter+p->v*(dt);
-				logger::log("deflected particle with (p=%s, v=%s), from wall (%s -> %s) to (p=%s, v=%s)", std::string(oldpos).c_str(), std::string(oldv).c_str(), std::string(l1.a).c_str(), std::string(l1.b).c_str(), std::string(p->pos).c_str(), std::string(p->v).c_str());
+				newpos=inter+(p->v)*(dt);
+				if(critical_particle)
+				{
+					logger::log("deflected to pos=%s, v=%s, newpos=%s", STR(p->pos), STR(p->v), STR(newpos));
+					logger::log("force: %s", STR(mass*(1.0/passed_time)*(p->v-oldv)));
+				}
 			}
 		}
-		if(printed) __debugbreak();
-#endif
+		p->pos=newpos;
+		//if(critical_particle)
+		{
+			if(newpos.x>210.0+1e-3)
+				__debugbreak();
+			if(newpos.x<190.0-1e-3)
+				__debugbreak();
+		}
 	}
 	void fluid::calculate_glass_fluid_forces( particle* p, math::vec r )
 	{
@@ -149,7 +174,7 @@ namespace sph
 		math::vec forces=viscosity_force+pressure_force;
 		//forces*=100;
 		p->forces+=forces;
-		if(simulator::detailed_logging) logger::log("\tforces delta: (%lf, %lf)",forces.x, forces.y);
+		//if(simulator::detailed_logging) logger::log("\tforces delta: (%lf, %lf)",forces.x, forces.y);
 
 	}
 	void fluid::calculate_glass_fluid_densities( particle* p, math::vec r )

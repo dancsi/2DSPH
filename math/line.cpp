@@ -44,7 +44,7 @@ namespace math
 		s = (-s1_y * (_ls1.a.x -  _ls2.a.x) + s1_x * (_ls1.a.y - _ls2.a.y)) / (-s2_x * s1_y + s1_x * s2_y);
 		t = ( s2_x * (_ls1.a.y -  _ls2.a.y) - s2_y * (_ls1.a.x  -  _ls2.a.x)) / (-s2_x * s1_y + s1_x * s2_y);
 
-		if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+		if (s > 0 && s < 1 && t > 0 && t < 1)
 		{
 			_ip.x = _ls1.a.x + (t * s1_x);
 			_ip.y = _ls1.a.y + (t * s1_y);

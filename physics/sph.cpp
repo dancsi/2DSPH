@@ -269,21 +269,8 @@ namespace sph
 				f_surface_tension=-sigma*particles[i].color_field_laplacian*particles[i].color_field_gradient/color_field_gradient_length;
 			}
 			math::vec force=particles[i].forces;
-#if 0
-			if(physics::blackholes_enabled)
-			{
-				for(physics::black_hole& b: physics::black_holes)
-				{
-					force+=b.get_force_field(particles[i].pos);
-				}
-			}
-#endif
 			math::vec acceleration =  force / particles[i].density+physics::gravity;
 			max_force=std::max(max_force, (force+physics::gravity*particles[i].density).Length());
-			/*if(simulator::detailed_logging)
-			{
-			logger::log("%d: surface_tension: %s, pressure: %s, viscosity: %s, acceleration: %s", i, std::string(f_surface_tension).c_str(), std::string(particles[i].f_pressure).c_str(),	std::string(particles[i].f_viscosity).c_str(), std::string(acceleration).c_str());
-			}*/
 			math::vec old_v=particles[i].v;
 			particles[i].v=pow(damping, dt)*particles[i].v+acceleration*dt;
 
@@ -291,10 +278,9 @@ namespace sph
 
 			double deltat=dt;
 
-			enforce_walls(&particles[i], deltat, newpos);
 			enforce_glass(&particles[i], deltat, newpos);
+			enforce_walls(&particles[i], deltat, newpos);
 
-			particles[i].pos=newpos;
 			//logger::log("(%.2lf, %.2lf) ", particles[i].pos.x, particles[i].pos.y);
 		}
 	}
