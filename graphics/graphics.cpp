@@ -7,10 +7,10 @@ namespace graphics
 	{
 		SDL_Init( SDL_INIT_EVERYTHING );
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		logger::log("init sdl (%d, %d)", simulator::width*scale_factor, simulator::height*scale_factor);
+		logger::log("init sdl (%d, %d)", (int)(simulator::width*scale_factor), (int)(simulator::height*scale_factor));
 		SDL_SetVideoMode( simulator::width*scale_factor, simulator::height*scale_factor, 32, SDL_OPENGL );
 
-		glClearColor( 0, 0, 0, 0 );
+		glClearColor( 1, 1, 1, 0 );
 
 		glMatrixMode( GL_PROJECTION );
 		glLoadIdentity();
@@ -26,7 +26,7 @@ namespace graphics
 		//glEnable(GL_POLYGON_SMOOTH);
 		//glHint(GL_POLYGON_SMOOTH_HINT,GL_NICEST);
 
-		SDL_WM_SetCaption( "dowwin", NULL );
+		SDL_WM_SetCaption( "2DSPH", NULL );
 		return 1;
 	}
 

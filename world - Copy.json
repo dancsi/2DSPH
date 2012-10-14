@@ -1,0 +1,112 @@
+{
+    "dimensions": {
+        "w": 400,
+        "h": 300
+    },
+    "constants": {
+        "gravity": -50
+    },
+    "objects": {
+        "fixed": [
+            {
+                "type": "polyline",
+                "name": "bounding box",
+                "vertices": [
+                    {
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "x": 800,
+                        "y": 0
+                    },
+                    {
+                        "x": 800,
+                        "y": 600
+                    },
+                    {
+                        "x": 0,
+                        "y": 600
+                    }
+                ]
+            },
+            {
+                "type": "line",
+                "vertices": [
+                    {
+                        "x": 190,
+                        "y": -5
+                    },
+                    {
+                        "x": 190,
+                        "y": 600
+                    }
+                ]
+            },
+            {
+                "type": "line",
+                "vertices": [
+                    {
+                        "x": 210,
+                        "y": -5
+                    },
+                    {
+                        "x": 210,
+                        "y": 600
+                    }
+                ]
+            },
+            {
+                "type": "line",
+                "vertices": [
+                    {
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "x": 800,
+                        "y": 0
+                    }
+                ]
+            }/*, 
+            {
+                "type": "line",
+                "vertices": [
+                    {
+                        "x": 190,
+                        "y": 10
+                    },
+                    {
+                        "x": 210,
+                        "y": 30
+                    }
+                ]
+            }*/
+        ],
+        "movable": []
+    },
+    "fluids": [
+        {
+            "name": "water",
+            "particles_x": 20,
+            "particles_y": 50,
+            "spacing_x": 0.5,
+            "spacing_y": 1,
+            "start_x": 195,
+            "start_y": 20,
+            "mass": 0.000205429998,
+            "density": 0.000238402499,
+            "rest_density": 0.000476804998,
+            "damping": 0.980000019,
+            "eta": 0.00150000001,
+            "sigma": 0.000150000007,
+            "k": 250,
+            "smoothing_length": 3,
+            "gradient_length_treshold": 0.075000003,
+            "glass_pushback_distance": 1,
+            "glass_pushback_minimum_pressure": 0.01,
+            "glass_density": 2,
+            "glass_viscosity": 1.2
+        }
+    ]
+}

@@ -2,7 +2,7 @@
 \usepackage[serbian]{babel}
 \usepackage {fontspec, amsmath, amssymb, mathtools}
 \usepackage {clrscode3e, listings}
-\usepackage {graphicx, float}
+\usepackage {graphicx, float, caption, subcaption}
 
 \defaultfontfeatures{Ligatures=TeX}
 
@@ -29,19 +29,16 @@
 U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\v cnosti) pomo\'cu metode \emph{Smoothed Particle Hydrodynamics} (SPH). Iako se opisan algoritam odnosi na dve dimenzije, on se lako mo\v ze generalizovati na tri (pa \v cak i proizvoljan broj) dimenzija. Dobijeni program simulira me\dj usobnu interakciju do oko 10000 \v cestica, kao i njihove sudare sa stati\v cnim zidovima pri brzini od 60 koraka u sekundi (\emph{60fps}) na Intelovom \v cetvorojezgarnom Core i7 procesoru.
 \end{abstract}
 
-\section{Uvod}\label{uvod}
-    Razni fluidi su oduvek bili sastavni deo na\v sih \v zivota, pa je pored sveop\v steg razvoja tehnologije bilo pitanje vremena kad \'ce \v covek po\v zeleti da modelira i imitira njihovo kretanje, odnosno -- da ih simulira. Prirodno, i njihove simulacije se javljaju na raznim o\v cekivanim i manje o\v cekivanim mestima, i to, sa jedne strane u vidu vremenske prognoze, aerodinami\v cki oblikovanih automobila, aviona i raketa, a sa druge strane kao specijalni efekti u filmovima i kompjuterskim igrama.
+\section{Uvod}\label{uvod} Simulacije fluida se javljaju na raznim mestima, i to, sa jedne strane u vidu vremenske prognoze, aerodinami\v cki oblikovanih automobila, aviona i raketa, a sa druge strane kao specijalni efekti u filmovima i kompjuterskim igrama.
 
-    \subsection{Istorija}\label{istorija}
-        Prve korake u ovoj oblasti su napravili Claude-Louis Navier i George Gabriel Stokes 1822, postaviv\v si Navier-Stoksove jedna\v cine.
-        One \v cine osnovu mnogih modela atmosfere, okeana, vodovoda, krvotoka, a koriste se i u ispitivanju aerodinami\v cnosti aviona i automobila. Ipak, ove jedna\v cine imaju jedan veliki nedostatak: ne zna se da li imaju re\v senje za proizvoljno stanje fluida u 3 dimenzije. \v Stavi\v se, to pitanje predstavlja jedan od sedam milenijumskih problema Clayovog instituta za matematiku. Zbog toga se i danas radi na pronala\v zenju \v sto br\v zih (za izra\v cunavanje), ili \v sto preciznijih aproksimacija ovih jedna\v cina, koje nam garantuju da \'ce re\v senje postojati.
+\label{istorija}
+    Prve korake u ovoj oblasti su napravili Claude-Louis Navier i George Gabriel Stokes 1822, postaviv\v si Navier-Stoksove jedna\v cine.
+    One \v cine osnovu mnogih modela atmosfere, okeana, vodovoda, krvotoka, a koriste se i u ispitivanju aerodinami\v cnosti aviona i automobila. Ipak, ove jedna\v cine imaju jedan veliki nedostatak: ne zna se da li imaju re\v senje za proizvoljno stanje fluida u 3 dimenzije. \v Stavi\v se, to pitanje predstavlja jedan od sedam milenijumskih problema Clayovog instituta za matematiku. Zbog toga se i danas radi na pronala\v zenju \v sto br\v zih (za izra\v cunavanje), ili \v sto preciznijih aproksimacija ovih jedna\v cina, koje nam garantuju da \'ce re\v senje postojati.
+    Prve kompjuterske simulacije su bile delo stru\v cnjaka iz NASA-e, ustanove koja je u tom trenutku jedina imala kompjutere dovoljno jake da simuliraju vazduh u realnom vremenu, pa makar to bilo u dve dimenzije. Bitan pomak u re\v savanju Navier-Stokesovih jedna\v cina u 3D na\v cinjen je u \cite{Foster:1996:RAL:244304.244315}, oslanjaju\'ci se na \cite{harlow:2182}.
 
-        Prve kompjuterske simulacije su bile delo stru\v cnjaka iz NASA-e, ustanove koja je u tom trenutku jedina imala kompjutere dovoljno jake da simuliraju vazduh u realnom vremenu, pa makar to bilo u dve dimenzije. Bitan pomak u re\v savanju Navier-Stokesovih jedna\v cina u 3D na\v cinjen je u \cite{Foster:1996:RAL:244304.244315}, oslanjaju\'ci se na \cite{harlow:2182}.
+    Osnovu ovog rada \v cini metod Smoothed Particle Hydrodynamics (SPH), otkriven 1977, nezavisno u \cite{1977MNRAS.181..375G} i \cite{1977AJ.....82.1013L}. U oba rada SPH je iskori\v s\'cen za modeliranje zvezda, i zbog toga nije pravljen da radi u realnom vremenu. Tek u \cite{Muller:2003:PFS:846276.846298} je dat pojednostavljeni algoritam, pogodan za izvr\v savanje u realnom vremenu.
 
-        Osnovu ovog rada \v cini metod Smoothed Particle Hydrodynamics (SPH), otkriven 1977, nezavisno u \cite{1977MNRAS.181..375G} i \cite{1977AJ.....82.1013L}. U oba rada SPH je iskori\v s\'cen za modeliranje zvezda, i zbog toga nije pravljen da radi u realnom vremenu. Tek u \cite{Muller:2003:PFS:846276.846298} je dat pojednostavljeni algoritam, pogodan za izvr\v savanje u realnom vremenu.
-
-    \subsection{Motivacija i cilj}\label{motivacija}
-        Cilj ovog rada je simuliranje te\v cnosti u dve dimenzije, pomo\'cu metode Smoothed particle hydrodynamics, pri \v cemu je teren za simulaciju zadat od strane korisnika.
+    Cilj ovog rada je simuliranje te\v cnosti u dve dimenzije, pomo\'cu metode Smoothed particle hydrodynamics, pri \v cemu je teren za simulaciju zadat od strane korisnika.
 
 \section{Teorijske osnove}
     \subsection{Osnovni pojmovi iz dinamike fluida}
@@ -82,9 +79,9 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
         \begin{equation}\label{eq:Navier-Stokes opsti slucaj}
             \rho(\frac{\delta \vec{v}}{\delta t} + \vec{v} \cdot \nabla \vec{v}) = -\nabla p + \nabla \cdot \vec{T} + \vec{F}
         \end{equation}
-        Iako mo\v zda na prvi pogled deluje komplikovano, ona u stvari predstavlja drugi Newtonov zakon za kretanje fluida. Tako\dj e, za potrebe ovog rada je dovoljna pojednostavljena verzija jedna\v cine, koja se odnosi na Newtonovske fluide, nesti\v sljivog toka. Njeno izvo\dj enje sledi.
+        Ona u stvari predstavlja drugi Newtonov zakon za kretanje fluida. Tako\dj e, za potrebe ovog rada je dovoljna pojednostavljena verzija jedna\v cine, koja se odnosi na Newtonovske fluide, nesti\v sljivog toka. Njeno izvo\dj enje sledi.
 
-        Krenimo od dobro poznatog drugog Newtonovog zakona,
+        Krenimo od drugog Newtonovog zakona,
         \begin{equation}\label{eq:Newtonov 2. zakon}
             \vec{F}=m\vec{a}
         \end{equation}
@@ -178,7 +175,6 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
     \subsection{Sudar \v cvrstih tela} \label{Sudar cvrstih tela}
         Sa druge strane, ako i posle primene prethodnog algoritma postoji opasnost da \v cestica pro\dj e kroz zid, ovaj primitivni algoritam \'ce je odbiti kao gumenu lopticu, reflektovanjem vektora njene brzine u odnosu na zid. Ovo je poslednji deo svakog koraka simulacije, i izvr\v sava se sve dok tokom simuliranog vremena ($dt$) \v cestica ima u blizini zid kroz koji bi pro\v sla, a da nije prethodno bila odbijena od njega.
 
-\section{Simulacija-algoritam}
     \subsection{Pseudokod}
 
 \begin{codebox}
@@ -217,17 +213,36 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
 \li     Iscrtati \v cestice na ekran
    \End
 \end{codebox}
-    \subsection{Optimizacije}
-        Naivna implementacija goreopisanog algoritma je naravno daleko od optimalne. Zato je kori\v s\'ceno nekoliko ''trikova'' za optimizaciju. Jasno je da u navedenom algoritmu najvi\v se vremena odlazi na operacije koje se odnose na svaki par \v cestica ($\mathcal(O)(n^2)$ vremena). Prime\'ceno je da od mogu\'cih $n^2$ parova \v cestica veliki broj njih uop\v ste ne uti\v ce jedna na drugu, jer su one na dovoljno velikoj udaljenosti da bi vrednost funkcije za poravnavanje bila $0$. Da bi se u\v stedelo na vremenu, \v cestice su podeljene u \'celije, pa je onda dovoljno samo proveravati interakciju \v cestica u istim i susednim \' celijama. Jo\v s bolje, kada se na po\v cetku jednog koraka odrede \v cestice koje \'ce me\dj usobno interagovati se sa\v cuvaju u jednu listu koja se onda koristi do kraja tog koraka.
-        
     \subsection{Tehi\v cki detalji}
+        Naivna implementacija goreopisanog algoritma je naravno daleko od optimalne. Zato je kori\v s\'ceno nekoliko ''trikova'' za optimizaciju. Jasno je da u navedenom algoritmu najvi\v se vremena odlazi na operacije koje se odnose na svaki par \v cestica ($\mathcal(O)(n^2)$ vremena). Prime\'ceno je da od mogu\'cih $n^2$ parova \v cestica veliki broj njih uop\v ste ne uti\v ce jedna na drugu, jer su one na dovoljno velikoj udaljenosti da bi vrednost funkcije za poravnavanje bila $0$. Da bi se u\v stedelo na vremenu, \v cestice su podeljene u \'celije, te se onda samo proverava interakcija \v cestica u istim i susednim \' celijama. Potom, kada se na po\v cetku jednog koraka odrede \v cestice koje \'ce me\dj usobno interagovati se sa\v cuvaju u jednu listu koja se onda koristi do kraja tog koraka.
+        
         Program je pisan u programskom jeziku C++. Za grafiku je kori\v s\'cena biblioteka SDL, koja se oslanja na OpenGL grafi\v cki sistem.
         Teren za simulaciju, kao i ostali parametri simulaciju su sa\v cuvani u JSON formatu, za \v cije je u\v citavanje kori\v s\'cena biblioteka Boost.
 
-    \section{Rezultati}
-        Napravljeni program simulira do oko 10000 \v cestica proizvoljne te\v cnosti (ili gasa), zadate parametrima. Simulacija radi na 60fps, na Intelovom \v cetvorojezgarnom Core i7 procesoru. \v Cestice vizuelno zadovoljavaju\'ce reaguju me\dj usobno, kao i sa zidovima, sve dok situacija ne postane numeri\v cki nestabilna. Tada prizor na ekranu vi\v se li\v ci na kokanje kokica nego na bilo \v sta drugo.
-        
-        Dalji pravac razvoja bi verovatno i\v sao u smeru pove\'anja stabilnosti simulacije, kao i implementacija nekog naprednijeg algoritma za renderovanje fluida.
+\section{Rezultati}
+    Napravljeni program simulira do oko 10000 \v cestica proizvoljne te\v cnosti (ili gasa), zadate parametrima. Simulacija radi na 60fps, na Intelovom \v cetvorojezgarnom Core i7 procesoru. \v Cestice vizuelno zadovoljavaju\'ce reaguju me\dj usobno, kao i sa zidovima, sve dok simuluacija ne postane nestabilna. Tada \v cestice po\v cinju da se kre\'cu haoti\v cno, i zakon odr\v zanja energije prividno prestaje da va\v zi.
+    \begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/screenshots/1.png}
+        \caption{Stabilna simulacija}
+        \label{fig:Stabilna simulacija}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/screenshots/2.png}
+        \caption{Nestabilna simulacija}
+        \label{fig:Stabilna simulacija}
+    \end{subfigure}
+    \caption{Slike programa u radu} \label{Slike}
+    \end{figure}
+    Uzrok nestabilnosti jo\v s nije odre\dj en, ali verovatno le\v zi u lo\v sem izboru parametara simulacije. Eksperimenti pokazuju da je za to najzaslu\v zniji parametar ''gasna konstanta'', iz jedna\v cine \eqref{eq:SPH racunanje pritiska}. Ukoliko je on previ\v se mali, \v cestice se uop\v ste ne\'ce odbijati, a ukoliko je prevelik, simulacija postaje nestabilna. U ovom konkretnom slu\v caju, vrednost $k=250$ se pokazala skoro optimalnom.
+\section{Zaklju\v cak}
+    Iako simulacija daje vizualno prihvatljivi izlaz, zbog nepredvidivosti trenutka gubitka stabilnosti, jo\v s uvek nije pogodna za neku prakti\v cnu upotrebu. 
+    
+    Dalji pravac razvoja bi verovatno i\v sao u smeru pove\'canja stabilnosti simulacije, kao i implementacija nekog naprednijeg algoritma za renderovanje fluida.
+    
 \newpage
 \bibliographystyle{abbrv}
 \bibliography{2DSPH}

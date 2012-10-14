@@ -104,7 +104,7 @@ namespace sph
 
 		if(newpos.x<190.0) critical_particle=true;
 		if(newpos.x>210.0) critical_particle=true;
-		//critical_particle=false;
+		critical_particle=false;
 		if(critical_particle)
 		{
 			logger::log("critical particle %p\n", p);
@@ -151,7 +151,7 @@ namespace sph
 			}
 		}
 		p->pos=newpos;
-		//if(critical_particle)
+		if(critical_particle)
 		{
 			if(newpos.x>210.0+1e-3)
 				__debugbreak();

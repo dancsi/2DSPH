@@ -233,6 +233,11 @@ namespace sph
 			pressure_force_a=common_pressure_term/b->density,
 			pressure_force_b=-common_pressure_term/a->density;
 
+		const double sugavi_koeficijent=10000;
+		pressure_force_a+=r*(a->density*b->density)/(r_length*r_length)*sugavi_koeficijent;
+		pressure_force_b+=-r*(a->density*b->density)/(r_length*r_length)*sugavi_koeficijent;
+
+
 		//viscosity
 		math::vec common_viscosity_term=mass*eta*((b->v)-(a->v))*math::w_viscosity_laplacian(r_length);
 		math::vec

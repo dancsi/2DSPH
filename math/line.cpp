@@ -8,7 +8,7 @@ namespace math
 
 	void line::draw()
 	{
-		glColor3f(0, 0, 1);
+		glColor3f(0.5, 0.5, 0.5);
 		glBegin(GL_LINES);
 		{
 			glVertex2d(a.x, a.y);
