@@ -180,6 +180,12 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
 \begin{codebox}
 \li \While \const{simulacija-radi} \Do
 \li     \For $\id{i} \gets 1$ \To $\const{broj-\v cestica}$ \Do
+\li          Postaviti $\id{\v cestica[i].gustina}$, $\id{\v cestica[i].pritisak}$, $\id{\v cestica[i].sila-pritiska}$, 
+\zi          $\id{\v cestica[i].viskozna-sila}$, $\id{\v cestica[i].gradijent-polja-boja}$, 
+\zi          $\id{\v cestica[i].Laplaceov-operator-polja-boja}$, $\id{\v cestica[i].sila-površinskog-napona}$, 
+\zi          $\id{\v cestica[i].sila}$, $\id{\v cestica[i].ubrzanje}$ na 0
+        \End
+\li     \For $\id{i} \gets 1$ \To $\const{broj-\v cestica}$ \Do
 \li         \For $\id{j} \gets 1$ \To $\const{broj-\v cestica}$ \Do
 \li             \Comment Prema jedna\v cini~\eqref{eq:SPH interpolacija gustine}
 \li             izra\v cunati gustine koje $\id{\v cestica}[i]$ i $\id{\v cestica}[j]$ dodaju jedna drugoj
@@ -191,8 +197,8 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
         \End
 \li     \For $\id{i} \gets 1$ \To $\const{broj-\v cestica}$ \Do
 \li         \For $\id{j} \gets 1$ \To $\const{broj-\v cestica}$ \Do
-\li             \Comment Prema jedna\v cinama~\eqref{eq:SPH interpolacija sile pritiska (simetricno)},~\eqref{eq:SPH interpolacija sile viskoziteta (simetricno)},~\eqref{eq:SPH interpolacija polja boja},~\eqref{eq:SPH interpolacija gradijenta},~\eqref{eq:SPH interpolacija Laplasovog operatora}
-\li             izra\v cunati dodatne $\id{sile-pritiska}$, $\id{viskozne-sile}$,
+\li             \Comment Prema jedna\v cinama ~\eqref{eq:SPH racunanje pritiska},~\eqref{eq:SPH interpolacija sile pritiska (simetricno)},~\eqref{eq:SPH interpolacija sile viskoziteta (simetricno)},~\eqref{eq:SPH interpolacija polja boja},~\eqref{eq:SPH interpolacija gradijenta},~\eqref{eq:SPH interpolacija Laplasovog operatora}
+\li             izra\v cunati $\id{pritisak}$, dodatne $\id{sile-pritiska}$, $\id{viskozne-sile}$,
 \zi             $\id{gradijent-polja-boja}$, $\id{Laplaceov-operator-polja-boja}$
 \zi             koje $\id{\v cestica}[i]$ i $\id{\v cestica}[j]$ dodaju jedna drugoj
             \End
@@ -213,9 +219,11 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
 \li     Iscrtati \v cestice na ekran
    \End
 \end{codebox}
+\emph{Napomena:} svaki put kada je neka vrednost izra\v cuna, ona se \v cuva kao odgovaraju\'ci atribut te \v cestice.
+
     \subsection{Tehi\v cki detalji}
-        Naivna implementacija goreopisanog algoritma je naravno daleko od optimalne. Zato je kori\v s\'ceno nekoliko ''trikova'' za optimizaciju. Jasno je da u navedenom algoritmu najvi\v se vremena odlazi na operacije koje se odnose na svaki par \v cestica ($\mathcal(O)(n^2)$ vremena). Prime\'ceno je da od mogu\'cih $n^2$ parova \v cestica veliki broj njih uop\v ste ne uti\v ce jedna na drugu, jer su one na dovoljno velikoj udaljenosti da bi vrednost funkcije za poravnavanje bila $0$. Da bi se u\v stedelo na vremenu, \v cestice su podeljene u \'celije, te se onda samo proverava interakcija \v cestica u istim i susednim \' celijama. Potom, kada se na po\v cetku jednog koraka odrede \v cestice koje \'ce me\dj usobno interagovati se sa\v cuvaju u jednu listu koja se onda koristi do kraja tog koraka.
-        
+        Naivna implementacija goreopisanog algoritma je naravno daleko od optimalne. Zato je kori\v s\'ceno nekoliko ''trikova'' za optimizaciju. Jasno je da u navedenom algoritmu najvi\v se vremena odlazi na operacije koje se odnose na svaki par \v cestica ($\mathcal{O}(n^2)$ vremena). Prime\'ceno je da od mogu\'cih $n^2$ parova \v cestica veliki broj njih uop\v ste ne uti\v ce jedna na drugu, jer su one na dovoljno velikoj udaljenosti da bi vrednost funkcije za poravnavanje bila $0$. Da bi se u\v stedelo na vremenu, \v cestice su podeljene u \'celije, te se onda samo proverava interakcija \v cestica u istim i susednim \' celijama. Potom, kada se na po\v cetku jednog koraka odrede \v cestice koje \'ce me\dj usobno interagovati se sa\v cuvaju u jednu listu koja se onda koristi do kraja tog koraka.
+
         Program je pisan u programskom jeziku C++. Za grafiku je kori\v s\'cena biblioteka SDL, koja se oslanja na OpenGL grafi\v cki sistem.
         Teren za simulaciju, kao i ostali parametri simulaciju su sa\v cuvani u JSON formatu, za \v cije je u\v citavanje kori\v s\'cena biblioteka Boost.
 
@@ -239,10 +247,10 @@ U ovom radu je opisan fizi\v cki i informati\v cki aspekt simulacije fluida (te\
     \end{figure}
     Uzrok nestabilnosti jo\v s nije odre\dj en, ali verovatno le\v zi u lo\v sem izboru parametara simulacije. Eksperimenti pokazuju da je za to najzaslu\v zniji parametar ''gasna konstanta'', iz jedna\v cine \eqref{eq:SPH racunanje pritiska}. Ukoliko je on previ\v se mali, \v cestice se uop\v ste ne\'ce odbijati, a ukoliko je prevelik, simulacija postaje nestabilna. U ovom konkretnom slu\v caju, vrednost $k=250$ se pokazala skoro optimalnom.
 \section{Zaklju\v cak}
-    Iako simulacija daje vizualno prihvatljivi izlaz, zbog nepredvidivosti trenutka gubitka stabilnosti, jo\v s uvek nije pogodna za neku prakti\v cnu upotrebu. 
-    
+    Iako simulacija daje vizualno prihvatljivi izlaz, zbog nepredvidivosti trenutka gubitka stabilnosti, jo\v s uvek nije pogodna za neku prakti\v cnu upotrebu.
+
     Dalji pravac razvoja bi verovatno i\v sao u smeru pove\'canja stabilnosti simulacije, kao i implementacija nekog naprednijeg algoritma za renderovanje fluida.
-    
+
 \newpage
 \bibliographystyle{abbrv}
 \bibliography{2DSPH}
